@@ -1,16 +1,15 @@
 module Tile exposing (Tile(..), TileGrid, makeGrid, tileAt, count, replaceAt, updateStack)
 
 import Dict exposing (Dict)
+import Point exposing (Point)
 
 
 type Tile
     = EmptyTile
     | Draw
     | Drop
-
-
-type alias Point =
-    ( Int, Int )
+    | Swap
+    | Rot
 
 
 type alias TileGrid =
@@ -26,7 +25,7 @@ mapTo x f =
 
 
 makeGrid width height =
-    (mapTo height (\y -> mapTo width (\x -> ( ( x, y ), EmptyTile ))))
+    mapTo height (\y -> mapTo width (\x -> ( ( x, y ), EmptyTile )))
         |> List.concat
         |> Dict.fromList
 
@@ -64,7 +63,13 @@ updateStack tile =
         Drop ->
             drop
 
-        EmptyTile ->
+        Swap ->
+            swap
+
+        Rot ->
+            rot
+
+        _ ->
             identity
 
 
@@ -79,3 +84,26 @@ dup stack =
 
 drop =
     Maybe.withDefault [] << List.tail
+
+
+split index list =
+    ( List.take index list, List.drop index list )
+
+
+swap stack =
+    let
+        ( top, rest ) =
+            split 2 stack
+    in
+        (List.reverse top) ++ rest
+
+
+rot stack =
+    let
+        ( top, rest ) =
+            split 3 stack
+
+        ( front, back ) =
+            split 2 top
+    in
+        back ++ front ++ rest
