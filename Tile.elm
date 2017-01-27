@@ -2,6 +2,7 @@ module Tile exposing (Tile(..), TileGrid, makeGrid, tileAt, count, replaceAt, up
 
 import Dict exposing (Dict)
 import Point exposing (Point)
+import Util exposing (minRange, cartesian, (<<<))
 
 
 type Tile
@@ -20,18 +21,10 @@ type alias TileGrid =
 -- tile grid
 
 
-mapTo x f =
-    List.map f <| List.range 0 <| x - 1
-
-
 makeGrid width height =
-    mapTo height (\y -> mapTo width (\x -> ( ( x, y ), EmptyTile )))
-        |> List.concat
+    cartesian (minRange width) (minRange height)
+        |> List.map (flip (,) EmptyTile)
         |> Dict.fromList
-
-
-(<<<) =
-    (<<) << (<<)
 
 
 tileAt =
